@@ -16,28 +16,27 @@ local my_table = awful.util.table or gears.table -- 4.{0,1} compatibility
 
 local theme                                     = {}
 theme.confdir                                   = os.getenv("HOME") .. "/.config/awesome/themes/multicolor"
-theme.wallpaper                                 = theme.confdir .. "/wall.png"
-theme.font                                      = "Terminus 8"
-theme.menu_bg_normal                            = "#000000"
-theme.menu_bg_focus                             = "#000000"
+theme.wallpaper                                 = theme.confdir .. "/wall2.jpg"
+theme.font                                      = "Monospace 9"
 theme.bg_normal                                 = "#000000"
-theme.bg_focus                                  = "#000000"
+theme.bg_focus                                  = "#444444"
 theme.bg_urgent                                 = "#000000"
-theme.fg_normal                                 = "#aaaaaa"
-theme.fg_focus                                  = "#ff8c00"
+theme.fg_normal                                 = "#cccccc"
+theme.fg_focus                                  = "#ffffff"
 theme.fg_urgent                                 = "#af1d18"
 theme.fg_minimize                               = "#ffffff"
-theme.border_width                              = dpi(1)
+theme.border_width                              = 2
 theme.border_normal                             = "#1c2022"
-theme.border_focus                              = "#606060"
+theme.border_focus                              = "#444444"
 theme.border_marked                             = "#3ca4d8"
-theme.menu_border_width                         = 0
+theme.menu_border_color                         = "#ff8c00"
+theme.menu_border_width                         = 2
 theme.menu_width                                = dpi(130)
 theme.menu_submenu_icon                         = theme.confdir .. "/icons/submenu.png"
 theme.menu_fg_normal                            = "#aaaaaa"
 theme.menu_fg_focus                             = "#ff8c00"
 theme.menu_bg_normal                            = "#050505dd"
-theme.menu_bg_focus                             = "#050505dd"
+theme.menu_bg_focus                             = "#252525dd"
 theme.widget_temp                               = theme.confdir .. "/icons/temp.png"
 theme.widget_uptime                             = theme.confdir .. "/icons/ac.png"
 theme.widget_cpu                                = theme.confdir .. "/icons/cpu.png"
@@ -96,14 +95,14 @@ local markup = lain.util.markup
 -- Textclock
 os.setlocale(os.getenv("LANG")) -- to localize the clock
 local clockicon = wibox.widget.imagebox(theme.widget_clock)
-local mytextclock = wibox.widget.textclock(markup("#7788af", "%A %d %B ") .. markup("#ab7367", ">") .. markup("#de5e1e", " %H:%M "))
+local mytextclock = wibox.widget.textclock(markup("#99aacf", "%Y/%m/%d %A") .. markup("#cccccc", " %H:%M "))
 mytextclock.font = theme.font
 
 -- Calendar
 theme.cal = lain.widget.cal({
     attach_to = { mytextclock },
     notification_preset = {
-        font = "Terminus 10",
+        font = "Monospace 12",
         fg   = theme.fg_normal,
         bg   = theme.bg_normal
     }
@@ -162,10 +161,16 @@ theme.mail = lain.widget.imap({
 local cpuicon = wibox.widget.imagebox(theme.widget_cpu)
 local cpu = lain.widget.cpu({
     settings = function()
-        widget:set_markup(markup.fontfg(theme.font, "#e33a6e", cpu_now.usage .. "% "))
+        cpu_now.usage = cpu_now.usage
+        -- もし文字数が3文字未満なら、3文字になるまで空白を追加する
+        while string.len(cpu_now.usage) < 3 do
+            cpu_now.usage = " " .. cpu_now.usage
+        end
+        widget:set_markup(markup.fontfg(theme.font, "#e36a8e", cpu_now.usage .. "% "))
     end
 })
 
+--[[
 -- Coretemp
 local tempicon = wibox.widget.imagebox(theme.widget_temp)
 local temp = lain.widget.temp({
@@ -173,6 +178,7 @@ local temp = lain.widget.temp({
         widget:set_markup(markup.fontfg(theme.font, "#f1af5f", coretemp_now .. "°C "))
     end
 })
+--]]
 
 -- Battery
 local baticon = wibox.widget.imagebox(theme.widget_batt)
@@ -181,7 +187,9 @@ local bat = lain.widget.bat({
         local perc = bat_now.perc ~= "N/A" and bat_now.perc .. "%" or bat_now.perc
 
         if bat_now.ac_status == 1 then
-            perc = perc .. " plug"
+            perc = perc .. "⚡"
+        elseif not bat_now.ac_status == 0 then
+            perc = perc .. "⚠"
         end
 
         widget:set_markup(markup.fontfg(theme.font, theme.fg_normal, perc .. " "))
@@ -213,6 +221,18 @@ local netupinfo = lain.widget.net({
             theme.weather.update()
         end
         --]]
+        -- net_now.sentを文字列処理する。小数点以下2桁まで表示
+        net_now.sent = string.format("%.1f", net_now.sent)
+        -- もしnet_now.sentの文字数が4文字未満なら、4文字になるまで空白を追加する
+        while string.len(net_now.sent) < 8 do
+            net_now.sent = " " .. net_now.sent
+        end
+        -- net_now.receivedを文字列処理する。小数点以下2桁まで表示
+        net_now.received = string.format("%.1f", net_now.received)
+        -- もしnet_now.receivedの文字数が4文字未満なら、4文字になるまで空白を追加する
+        while string.len(net_now.received) < 8 do
+            net_now.received = " " .. net_now.received
+        end
 
         widget:set_markup(markup.fontfg(theme.font, "#e54c62", net_now.sent .. " "))
         netdowninfo:set_markup(markup.fontfg(theme.font, "#87af5f", net_now.received .. " "))
@@ -223,37 +243,39 @@ local netupinfo = lain.widget.net({
 local memicon = wibox.widget.imagebox(theme.widget_mem)
 local memory = lain.widget.mem({
     settings = function()
-        widget:set_markup(markup.fontfg(theme.font, "#e0da37", mem_now.used .. "M "))
+        -- 小数点2桁まで表示
+        widget:set_markup(markup.fontfg(theme.font, "#e0da37", string.format("%.2f", mem_now.used/1000) .. "G "))
+        --widget:set_markup(markup.fontfg(theme.font, "#e0da37", (mem_now.used/1000) .. "G "))
     end
 })
 
 -- MPD
-local mpdicon = wibox.widget.imagebox()
-theme.mpd = lain.widget.mpd({
-    settings = function()
-        mpd_notification_preset = {
-            text = string.format("%s [%s] - %s\n%s", mpd_now.artist,
-                   mpd_now.album, mpd_now.date, mpd_now.title)
-        }
+-- local mpdicon = wibox.widget.imagebox()
+-- theme.mpd = lain.widget.mpd({
+--     settings = function()
+--         mpd_notification_preset = {
+--             text = string.format("%s [%s] - %s\n%s", mpd_now.artist,
+--                    mpd_now.album, mpd_now.date, mpd_now.title)
+--         }
 
-        if mpd_now.state == "play" then
-            artist = mpd_now.artist .. " > "
-            title  = mpd_now.title .. " "
-            mpdicon:set_image(theme.widget_note_on)
-        elseif mpd_now.state == "pause" then
-            artist = "mpd "
-            title  = "paused "
-        else
-            artist = ""
-            title  = ""
-            --mpdicon:set_image() -- not working in 4.0
-            mpdicon._private.image = nil
-            mpdicon:emit_signal("widget::redraw_needed")
-            mpdicon:emit_signal("widget::layout_changed")
-        end
-        widget:set_markup(markup.fontfg(theme.font, "#e54c62", artist) .. markup.fontfg(theme.font, "#b2b2b2", title))
-    end
-})
+--         if mpd_now.state == "play" then
+--             artist = mpd_now.artist .. " > "
+--             title  = mpd_now.title .. " "
+--             mpdicon:set_image(theme.widget_note_on)
+--         elseif mpd_now.state == "pause" then
+--             artist = "mpd "
+--             title  = "paused "
+--         else
+--             artist = ""
+--             title  = ""
+--             --mpdicon:set_image() -- not working in 4.0
+--             mpdicon._private.image = nil
+--             mpdicon:emit_signal("widget::redraw_needed")
+--             mpdicon:emit_signal("widget::layout_changed")
+--         end
+--         widget:set_markup(markup.fontfg(theme.font, "#e54c62", artist) .. markup.fontfg(theme.font, "#b2b2b2", title))
+--     end
+-- })
 
 function theme.at_screen_connect(s)
     -- Quake application
@@ -287,7 +309,7 @@ function theme.at_screen_connect(s)
     s.mytasklist = awful.widget.tasklist(s, awful.widget.tasklist.filter.currenttags, awful.util.tasklist_buttons)
 
     -- Create the wibox
-    s.mywibox = awful.wibar({ position = "top", screen = s, height = dpi(19), bg = theme.bg_normal, fg = theme.fg_normal })
+    s.mywibox = awful.wibar({ position = "top", screen = s, height = 20, bg = theme.bg_normal, fg = theme.fg_normal })
 
     -- Add widgets to the wibox
     s.mywibox:setup {
@@ -297,8 +319,9 @@ function theme.at_screen_connect(s)
             --s.mylayoutbox,
             s.mytaglist,
             s.mypromptbox,
-            mpdicon,
-            theme.mpd.widget,
+            s.mytasklist, -- Middle widget
+            --mpdicon,
+            --theme.mpd.widget,
         },
         --s.mytasklist, -- Middle widget
         nil,
@@ -311,8 +334,8 @@ function theme.at_screen_connect(s)
             netdowninfo,
             netupicon,
             netupinfo.widget,
-            volicon,
-            theme.volume.widget,
+            --volicon,
+            --theme.volume.widget,
             memicon,
             memory.widget,
             cpuicon,
@@ -321,19 +344,21 @@ function theme.at_screen_connect(s)
             --theme.fs.widget,
             --weathericon,
             --theme.weather.widget,
-            tempicon,
-            temp.widget,
+            --tempicon,
+            --temp.widget,
             baticon,
             bat.widget,
-            clockicon,
+            --clockicon,
             mytextclock,
+            s.mylayoutbox
         },
     }
-
+    --[[
     -- Create the bottom wibox
     s.mybottomwibox = awful.wibar({ position = "bottom", screen = s, border_width = 0, height = dpi(20), bg = theme.bg_normal, fg = theme.fg_normal })
 
     -- Add widgets to the bottom wibox
+
     s.mybottomwibox:setup {
         layout = wibox.layout.align.horizontal,
         { -- Left widgets
@@ -345,6 +370,7 @@ function theme.at_screen_connect(s)
             s.mylayoutbox,
         },
     }
+    --]]
 end
 
 return theme

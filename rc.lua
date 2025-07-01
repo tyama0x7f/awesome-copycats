@@ -114,7 +114,7 @@ awful.layout.layouts = {
     --awful.layout.suit.spiral,
     awful.layout.suit.floating,
     awful.layout.suit.tile,
-    --wful.layout.suit.tile.left,
+    awful.layout.suit.tile.left,
     --awful.layout.suit.tile.bottom,
     --awful.layout.suit.tile.top,
     awful.layout.suit.fair,
@@ -122,8 +122,8 @@ awful.layout.layouts = {
     awful.layout.suit.max,
     --awful.layout.suit.max.fullscreen,
     awful.layout.suit.magnifier,
-    -- awful.layout.suit.corner.nw,
-    -- awful.layout.suit.corner.ne,
+    --awful.layout.suit.corner.nw,
+    --awful.layout.suit.corner.ne,
     -- awful.layout.suit.corner.sw,
     -- awful.layout.suit.corner.se,
     --lain.layout.cascade,
@@ -781,7 +781,7 @@ client.connect_signal("request::titlebars", function(c)
         end)
     )
 
-    awful.titlebar(c, { size = 16 }) : setup {
+    awful.titlebar(c, { size = 22 }) : setup {
         { -- Left
             awful.titlebar.widget.iconwidget(c),
             buttons = buttons,

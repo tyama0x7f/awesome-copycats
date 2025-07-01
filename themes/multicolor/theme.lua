@@ -17,26 +17,26 @@ local my_table = awful.util.table or gears.table -- 4.{0,1} compatibility
 local theme                                     = {}
 theme.confdir                                   = os.getenv("HOME") .. "/.config/awesome/themes/multicolor"
 theme.wallpaper                                 = theme.confdir .. "/wall2.jpg"
-theme.font                                      = "Monospace 9"
+theme.font                                      = "mplus-1p-regular 9"--"Noto Sans CJK 9""Unifont 12"
 theme.bg_normal                                 = "#000000"
-theme.bg_focus                                  = "#444444"
+theme.bg_focus                                  = "#333333"
 theme.bg_urgent                                 = "#000000"
 theme.fg_normal                                 = "#cccccc"
-theme.fg_focus                                  = "#ffffff"
+theme.fg_focus                                  = "#ff8c00"--"#eeeeee"
 theme.fg_urgent                                 = "#af1d18"
 theme.fg_minimize                               = "#ffffff"
-theme.border_width                              = 2
+theme.border_width                              = 1
 theme.border_normal                             = "#1c2022"
-theme.border_focus                              = "#444444"
+theme.border_focus                              = "#ff8c00"--"#ff8c00"--"#777777"
 theme.border_marked                             = "#3ca4d8"
-theme.menu_border_color                         = "#ff8c00"
+theme.menu_border_color                         = "#ff8c00"--"#ffffff"
 theme.menu_border_width                         = 2
 theme.menu_width                                = dpi(130)
 theme.menu_submenu_icon                         = theme.confdir .. "/icons/submenu.png"
 theme.menu_fg_normal                            = "#aaaaaa"
-theme.menu_fg_focus                             = "#ff8c00"
-theme.menu_bg_normal                            = "#050505dd"
-theme.menu_bg_focus                             = "#252525dd"
+theme.menu_fg_focus                             = "#ff8c00"--"#ffffff"
+theme.menu_bg_normal                            = "#050505"
+theme.menu_bg_focus                             = "#252525"
 theme.widget_temp                               = theme.confdir .. "/icons/temp.png"
 theme.widget_uptime                             = theme.confdir .. "/icons/ac.png"
 theme.widget_cpu                                = theme.confdir .. "/icons/cpu.png"
@@ -102,7 +102,7 @@ mytextclock.font = theme.font
 theme.cal = lain.widget.cal({
     attach_to = { mytextclock },
     notification_preset = {
-        font = "Monospace 12",
+        font = "M+ 2m 12",
         fg   = theme.fg_normal,
         bg   = theme.bg_normal
     }
@@ -187,9 +187,9 @@ local bat = lain.widget.bat({
         local perc = bat_now.perc ~= "N/A" and bat_now.perc .. "%" or bat_now.perc
 
         if bat_now.ac_status == 1 then
-            perc = perc .. "⚡"
+            perc = perc .. " ⚡ " 
         elseif not bat_now.ac_status == 0 then
-            perc = perc .. "⚠"
+            perc = perc .. " ⚠ "
         end
 
         widget:set_markup(markup.fontfg(theme.font, theme.fg_normal, perc .. " "))
@@ -306,10 +306,10 @@ function theme.at_screen_connect(s)
     s.mytaglist = awful.widget.taglist(s, awful.widget.taglist.filter.all, awful.util.taglist_buttons)
 
     -- Create a tasklist widget
-    s.mytasklist = awful.widget.tasklist(s, awful.widget.tasklist.filter.currenttags, awful.util.tasklist_buttons)
+    s.mytasklist = awful.widget.tasklist(s,awful.widget.tasklist.filter.currenttags, awful.util.tasklist_buttons)
 
     -- Create the wibox
-    s.mywibox = awful.wibar({ position = "top", screen = s, height = 20, bg = theme.bg_normal, fg = theme.fg_normal })
+    s.mywibox = awful.wibar({ position = "top", screen = s, height = dpi(25), bg = theme.bg_normal, fg = theme.fg_normal })
 
     -- Add widgets to the wibox
     s.mywibox:setup {
